@@ -17,7 +17,7 @@ end entity;
 
 architecture Form of Register_File is
 	type regarray is array(7 downto 0) of std_logic_vector(15 downto 0);   -- defining a new type
-	signal REG_file: regarray
+	signal REG_file: regarray;
 
 begin
 

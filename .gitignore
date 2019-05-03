@@ -1,2 +1,9 @@
 *.bak
 output_files*
+*.qpf
+*.qsf
+*db*
+simulation*
+timing*
+*.rpt
+*.qws

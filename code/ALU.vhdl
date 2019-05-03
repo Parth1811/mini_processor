@@ -1,9 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use work.16_bit_adder.all;
-use work.1616_bit_subtractor.all;
-use work.16_bit_nand.all;
-use work.MUX4.all;
+--use work.MUX4.all;
+use work.all;
 
 entity ALU is
 	port (
@@ -16,7 +14,35 @@ end entity ALU;
 
 architecture arch of ALU is
 	constant Z16 : std_logic_vector(15 downto 0)  := (others  => '0');
-	signal P, Q, R  : std_logic_vector(15 downto 0);
+	signal P, Q, R, Out_signal  : std_logic_vector(15 downto 0);
+
+	component adder_16bit is
+    port ( A : in std_logic_vector (15 downto 0);
+           B : in std_logic_vector (15 downto 0);
+           sum : out std_logic_vector (15 downto 0);
+			  Cout: out std_logic
+			 ) ;
+  end component;
+
+	component subtractor_16bit is
+	  port ( A : in std_logic_vector (15 downto 0);
+	         B : in std_logic_vector (15 downto 0);
+	         diff : out std_logic_vector (15 downto 0)) ;
+	end component ;
+
+	component nand_16bit is
+	  port ( A : in std_logic_vector (15 downto 0);
+	         B : in std_logic_vector (15 downto 0);
+	         nand_out : out std_logic_vector (15 downto 0)) ;
+	end component;
+
+	component MUX_4 is
+		port (
+	      S1, S0  : in std_logic;
+	      X1, X2, X3, X4 : in std_logic_vector(15 downto 0) ;
+	      Z : out std_logic_vector(15 downto 0)
+		);
+	end component;
 
 begin
 	add: adder_16bit
@@ -26,12 +52,14 @@ begin
 		port map (A => A, B => B, diff => Q);
 
 	nand1: nand_16bit
-		port map (A => A, Y => A, nand_out => R);
+		port map (A => A, B => A, nand_out => R);
 
 	mux_alu: MUX_4
-		port map (A0 => P, A1 => Q ,A2 => R, A3 => Z16, S0 => OP(0), S1 => OP(1), Z => O);
+		port map (X1 => P, X2 => Q ,X3 => R, X4 => Z16, S0 => OP(0), S1 => OP(1), Z => Out_signal);
 
-	Z <= 	'1' when (O = Z16) else
+	Z <= 	'1' when (Out_signal = Z16) else
 				'0';
+
+	O <= Out_signal;
 
 end architecture ; -- arch
