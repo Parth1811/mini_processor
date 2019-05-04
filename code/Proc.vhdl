@@ -39,7 +39,7 @@ architecture arch of Proc is
 
 	constant Z16 : std_logic_vector(15 downto 0):= (others  => '0');
 
-  type StateSymbol is (S0, S1);
+  type StateSymbol is (S0, S0_set, Decode,S1);
   signal fsm_state_symbol: StateSymbol;
 
 	signal ALU_A, ALU_B, ALU_O : std_logic_vector(15 downto 0);
@@ -123,22 +123,17 @@ begin
 		 -- add wave clk RST IP IR MEM_Dout
      case fsm_state_symbol is
        when S0 =>
-			 		nIP := "0000000000000001";
-			 		nMEM_A := nIP;
-					nIR := nMEM_Dout;
+			 		nMEM_A := IP;
 					nALU_OP := "00";
-					nALU_A := nIP;
+					nALU_A := IP;
 					nALU_B := "0000000000000001";
-					nIP := nALU_O;
+					next_state := S0_set;
+
+		   when S0_set =>
+			 		next_state := S1;
+					nIP := ALU_O;
+					nIR := MEM_Dout;
 					next_state := S0;
-
-		   when S1 =>
-					 nMEM_A := nIP;
-					 nIR := nMEM_Dout;
-					 nALU_A := nIP;
-					 nALU_B := "0000000000000001";
-					 nIP := nALU_O;
-
 
        -- when C1 =>
        --      s_var := not a xor b;
@@ -152,9 +147,16 @@ begin
      end case;
 
 
-     if(clk'event and clk='1') then
+     if(rising_edge(clk)) then
           if (RST = '1') then
-             fsm_state_symbol <= S0;
+             	fsm_state_symbol <= S0;
+						 	IP <= Z16;
+							IR <= Z16;
+
+							T1 <= Z16;
+							T2 <= Z16;
+							T3 <= Z16;
+
           else
 							ALU_A <= nALU_A;
 							ALU_B <= nALU_B;
