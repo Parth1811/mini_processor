@@ -77,7 +77,8 @@ begin
 		);
 
 
-  process(clk, RST)
+  process(clk, RST, ALU_A, ALU_B, ALU_OP, MEM_A , MEM_Din, MEM_W , REG_A1, REG_Din1, REG_A2, REG_Din2, REG_W1, REG_W2, IP, IR, T1, T2, T3, fsm_state_symbol)
+
 		 variable nALU_A, nALU_B, nALU_O : std_logic_vector(15 downto 0);
 		 variable nALU_OP : std_logic_vector(1 downto 0);
 		 variable nALU_C, nALU_Z : std_logic;
@@ -98,21 +99,16 @@ begin
 
 		 nALU_A := ALU_A;
 		 nALU_B := ALU_B;
-		 nALU_O := ALU_O;
 		 nALU_OP := ALU_OP;
-		 nALU_C := ALU_C;
 
 		 nMEM_A := MEM_A;
 		 nMEM_Din := MEM_Din;
-		 nMEM_Dout := MEM_Dout;
 		 nMEM_W := MEM_W;
 
 		 nREG_A1 := REG_A1;
 		 nREG_Din1 := REG_Din1;
-		 nREG_Dout1 := REG_Dout1;
 		 nREG_A2 := REG_A2;
 		 nREG_Din2 := REG_Din2;
-		 nREG_Dout2 := REG_Dout2;
 		 nREG_W1 := REG_W1;
 		 nREG_W2 := REG_W2;
 
@@ -130,10 +126,11 @@ begin
 			 		nIP := "0000000000000001";
 			 		nMEM_A := nIP;
 					nIR := nMEM_Dout;
+					nALU_OP := "00";
 					nALU_A := nIP;
 					nALU_B := "0000000000000001";
 					nIP := nALU_O;
-					next_state := S1;
+					next_state := S0;
 
 		   when S1 =>
 					 nMEM_A := nIP;
@@ -161,21 +158,16 @@ begin
           else
 							ALU_A <= nALU_A;
 							ALU_B <= nALU_B;
-							ALU_O <= nALU_O;
 							ALU_OP <= nALU_OP;
-							ALU_C <= nALU_C;
 
 							MEM_A <= nMEM_A;
 							MEM_Din <= nMEM_Din;
-							MEM_Dout <= nMEM_Dout;
 							MEM_W <= nMEM_W;
 
 							REG_A1 <= nREG_A1;
 							REG_Din1 <= nREG_Din1;
-							REG_Dout1 <= nREG_Dout1;
 							REG_A2 <= nREG_A2;
 							REG_Din2 <= nREG_Din2;
-							REG_Dout2 <= nREG_Dout2;
 							REG_W1 <= nREG_W1;
 							REG_W2 <= nREG_W2;
 
@@ -191,7 +183,6 @@ begin
      end if;
 
   end process;
-
 
 
 
