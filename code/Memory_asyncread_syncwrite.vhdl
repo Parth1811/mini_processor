@@ -22,7 +22,7 @@ architecture Form of Memory_asyncread_syncwrite is
 	type regarray is array(65535 downto 0) of std_logic_vector(15 downto 0);   -- defining a new type
 	signal Memory:
 		regarray:=(
-				0 => x"ff10",
+				0 => "0000001010011000",
 				1 => x"3000",
 				2 => x"1057",
 				3 => x"4442",

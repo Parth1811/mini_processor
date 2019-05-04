@@ -9,16 +9,25 @@ use ieee.std_logic_unsigned.all;
 
 entity Register_File is
 	port (
-				A1, A2, Din1, Din2 : in std_logic_vector(15 downto 0);
-	 			clk, W1, W2 			 : in std_logic;
-				Dout1, Dout2       : out std_logic_vector(15 downto 0)
+				A1, A2       : in std_logic_vector(2 downto 0);
+				Din1, Din2 	 : in std_logic_vector(15 downto 0);
+	 			clk, W1, W2  : in std_logic;
+				Dout1, Dout2 : out std_logic_vector(15 downto 0)
 			 );
 end entity;
 
 architecture Form of Register_File is
 	type regarray is array(7 downto 0) of std_logic_vector(15 downto 0);   -- defining a new type
-	signal REG_file: regarray;
-
+	signal REG_file:
+		regarray:=(
+					0 => "0000001010011000",
+					1 => x"3000",
+					2 => x"1057",
+					3 => x"4442",
+					4 => x"0458",
+					5 => x"2460",
+					6 => x"2921",
+					7 => x"0000");
 begin
 
   Dout1 <= REG_file(conv_integer(A1));

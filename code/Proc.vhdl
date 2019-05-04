@@ -23,7 +23,8 @@ architecture arch of Proc is
 
 	component Register_File is
 		port (
-			A1, A2, Din1, Din2 : in std_logic_vector(15 downto 0);
+			A1, A2       : in std_logic_vector(2 downto 0);
+			Din1, Din2 	 : in std_logic_vector(15 downto 0);
 			clk, W1, W2 			 : in std_logic;
 			Dout1, Dout2       : out std_logic_vector(15 downto 0)
 		);
@@ -49,11 +50,17 @@ architecture arch of Proc is
 	signal MEM_A, MEM_Din, MEM_Dout: std_logic_vector(15 downto 0);
 	signal MEM_W: std_logic;
 
-	signal REG_A1, REG_Din1, REG_Dout1, REG_A2, REG_Din2, REG_Dout2: std_logic_vector(15 downto 0);
+	signal REG_Din1, REG_Dout1, REG_Din2, REG_Dout2: std_logic_vector(15 downto 0);
+	signal REG_A1, REG_A2: std_logic_vector(2 downto 0);
 	signal REG_W1, REG_W2: std_logic;
 
 	signal IP, IR, T1, T2, T3 : std_logic_vector(15 downto 0);
 	signal C0, Z0, Cn, Zn : std_logic;
+
+	alias rRA is IR(11 downto 9);
+	alias rRB is IR(8 downto 6);
+	alias rRC is IR(5 downto 3);
+
 
 begin
 
@@ -76,6 +83,19 @@ begin
 			Dout => MEM_Dout
 		);
 
+	reg: Register_File
+		port map(
+				A1 => REG_A1,
+				A2 => REG_A2,
+				Din1 => REG_Din1,
+				Din2 => REG_Din2,
+				clk => clk,
+				W1 => REG_W1,
+				W2 => REG_W2,
+				Dout1 => REG_Dout1,
+				Dout2 => REG_Dout2
+			);
+
 
   process(clk, RST, ALU_A, ALU_B, ALU_OP, MEM_A , MEM_Din, MEM_W , REG_A1, REG_Din1, REG_A2, REG_Din2, REG_W1, REG_W2, IP, IR, T1, T2, T3, fsm_state_symbol)
 
@@ -86,7 +106,8 @@ begin
 		 variable nMEM_A, nMEM_Din, nMEM_Dout: std_logic_vector(15 downto 0);
 		 variable nMEM_W: std_logic;
 
-		 variable nREG_A1, nREG_Din1, nREG_Dout1, nREG_A2, nREG_Din2, nREG_Dout2: std_logic_vector(15 downto 0);
+		 variable nREG_Din1, nREG_Dout1, nREG_Din2, nREG_Dout2: std_logic_vector(15 downto 0);
+		 variable nREG_A1, nREG_A2: std_logic_vector(2 downto 0);
 		 variable nREG_W1, nREG_W2: std_logic;
 
 		 variable next_state : StateSymbol;
@@ -130,10 +151,24 @@ begin
 					next_state := S0_set;
 
 		   when S0_set =>
-			 		next_state := S1;
 					nIP := ALU_O;
 					nIR := MEM_Dout;
+					next_state := Decode;
+
+  		 when Decode =>
+			 		if (IR(15 downto 12) = "0000") then
+						next_state := S1;
+					else
+						next_state := S0;
+					end if;
+
+ 			 when S1 =>
+					nREG_A1 := rRA;
+					nREG_A2 := rRB;
 					next_state := S0;
+					nT1 := REG_Dout1;
+					nT2 := REG_Dout2;
+
 
        -- when C1 =>
        --      s_var := not a xor b;
