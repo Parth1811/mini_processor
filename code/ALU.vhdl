@@ -52,7 +52,7 @@ begin
 		port map (A => A, B => B, diff => Q);
 
 	nand1: nand_16bit
-		port map (A => A, B => A, nand_out => R);
+		port map (A => A, B => B, nand_out => R);
 
 	mux_alu: MUX_4
 		port map (X1 => P, X2 => Q ,X3 => R, X4 => Z16, S0 => OP(0), S1 => OP(1), Z => Out_signal);
