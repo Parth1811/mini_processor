@@ -74,6 +74,8 @@ architecture arch of Proc is
 
 	constant Z16 : std_logic_vector(15 downto 0):= (others  => '0');
 	constant ONE : std_logic_vector(15 downto 0):= "0000000000000001";
+	constant ALL_ONE : std_logic_vector(15 downto 0):= (others  => '1');
+	constant SEVEN : std_logic_vector(15 downto 0):= "0000000000000111";
 
   type StateSymbol is (S0, Decode, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25, S26, S27, S28, S29 );
   signal fsm_state_symbol: StateSymbol;
@@ -229,6 +231,8 @@ begin
 						next_state := S16;   -- JLR
 					elsif (Instruction = "1000") then
 						next_state := S18;   -- JAL
+					elsif (Instruction = "0110") then
+						next_state := S20;   -- LA
 					else
 						next_state := S0;
 					end if;
@@ -565,6 +569,79 @@ begin
 					end if;
 					if (state_counter = "00") then
 							next_state := S0;
+							nstate_counter := "10";
+					end if;
+
+			when S21 =>
+					if (state_counter = "10") then
+							nREG_A1 := rRA;
+							nT2 := ALL_ONE;
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nT1 := REG_Dout1;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S22;
+							nstate_counter := "10";
+					end if;
+
+			when S22 =>
+					if (state_counter = "10") then
+							nMEM_A := T1;
+							nALU_A := T2;
+							nALU_B := ONE;
+							nALU_OP := "00";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nT3 := MEM_Dout;
+							nT2 := ALU_O;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S23;
+							nstate_counter := "10";
+					end if;
+
+			when S23 =>
+					if (state_counter = "10") then
+							nALU_A := T1;
+							nALU_B := ONE;
+							nALU_OP := "00";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nT1 := ALU_O;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S24;
+							nstate_counter := "10";
+					end if;
+
+			when S24 =>
+					if (state_counter = "10") then
+							nREG_A1 := T2(2 downto 0);
+							nREG_Din1 := T3;
+							nREG_W1 := '1';
+							nALU_A := T2;
+							nALU_B := SEVEN;
+							nALU_OP := "01";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nZ := ALU_Z;
+							nREG_W1 := '0';
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							if (nZ = '0') then
+								next_state := S22;
+							else
+								next_state := S0;
+							end if;
 							nstate_counter := "10";
 					end if;
 
