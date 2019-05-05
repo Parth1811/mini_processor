@@ -27,8 +27,8 @@ architecture arch of Proc is
 	  --extend a 9 bit vector to 16 bit vector by adding zeros to starting
 	  variable res_v : std_logic_vector(15 downto 0);
 		begin
-			res_v(8 downto 0) := slv;
-			res_v(15 downto 9) := "0000000";
+			res_v(15 downto 7) := slv;
+			res_v(6 downto 0) := "0000000";
 	  return res_v;
 	end function;
 
