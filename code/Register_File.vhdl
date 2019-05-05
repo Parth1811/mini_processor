@@ -20,10 +20,10 @@ architecture Form of Register_File is
 	type regarray is array(7 downto 0) of std_logic_vector(15 downto 0);   -- defining a new type
 	signal REG_file:
 		regarray:=(
-					0 => "0000001010011000",
-					1 => x"3000",
-					2 => x"1057",
-					3 => x"4442",
+					0 => x"7874",
+					1 => x"f020",
+					2 => x"a457",
+					3 => x"4472",
 					4 => x"0458",
 					5 => x"2460",
 					6 => x"2921",
