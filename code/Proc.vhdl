@@ -212,6 +212,8 @@ begin
 						next_state := S9;    -- SW
 					elsif (Instruction = "1100") then
 						next_state := S12;   -- BEQ
+					elsif (Instruction = "1001") then
+						next_state := S16;   -- JLR
 					else
 						next_state := S0;
 					end if;
@@ -466,6 +468,39 @@ begin
 						nIP := T3;
  					end if;
 					next_state := S0;
+
+			when S16 =>
+ 					if (state_counter = "10") then
+							nALU_A := IP;
+							nALU_B := ONE;
+							nALU_OP := "01";
+							nstate_counter := "01";
+ 					end if;
+ 					if (state_counter = "01") then
+							nT1 := ALU_O;
+							nstate_counter := "00";
+ 					end if;
+ 					if (state_counter = "00") then
+ 							next_state := S17;
+ 					  	nstate_counter := "10";
+ 					end if;
+
+		when S17 =>
+					if (state_counter = "10") then
+							nREG_A1 := rRA;
+							nREG_A2 := rRB;
+							nREG_Din1 := T1;
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nIP := REG_Dout2;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S0;
+					  	nstate_counter := "10";
+					end if;
+
 
 
 			 when others => null;
