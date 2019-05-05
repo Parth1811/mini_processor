@@ -23,6 +23,19 @@ architecture arch of Proc is
 	  return res_v;
 	end function;
 
+	function sign_extender9(slv : in std_logic_vector) return std_logic_vector is
+	  --extend a 9 bit vector to 16 bit vector
+	  variable res_v : std_logic_vector(15 downto 0);
+		begin
+			res_v(8 downto 0) := slv;
+		  for i in 0 to 6 loop
+		    res_v(i + 9) := slv(8);
+		  end loop;
+	  return res_v;
+	end function;
+
+
+
 	function zero_extender(slv : in std_logic_vector) return std_logic_vector is
 	  --extend a 9 bit vector to 16 bit vector by adding zeros to starting
 	  variable res_v : std_logic_vector(15 downto 0);
@@ -214,6 +227,8 @@ begin
 						next_state := S12;   -- BEQ
 					elsif (Instruction = "1001") then
 						next_state := S16;   -- JLR
+					elsif (Instruction = "1000") then
+						next_state := S18;   -- JAL
 					else
 						next_state := S0;
 					end if;
@@ -270,6 +285,7 @@ begin
 					 if (state_counter = "01") then
 						 phi_c0 := '1';
 						 phi_z0 := '1';
+						 nREG_W1 := '0';
 					   nstate_counter := "00";
 					 end if;
 
@@ -325,6 +341,7 @@ begin
 					 if (state_counter = "01") then
 						 phi_c0 := not IR(14);  -- Changin carry flag only for ADI and not for LW
 						 phi_z0 := '1';
+						 nREG_W1 := '0';
 					   nstate_counter := "00";
 					 end if;
 					 if (state_counter = "00") then
@@ -354,6 +371,7 @@ begin
 					 nstate_counter := "01";
 				 end if;
 				 if (state_counter = "01") then
+					 nREG_W1 := '0';
 				   nstate_counter := "00";
 				 end if;
 				 if (state_counter = "00") then
@@ -501,6 +519,54 @@ begin
 					  	nstate_counter := "10";
 					end if;
 
+			when S18 =>
+					if (state_counter = "10") then
+							nALU_A := IP;
+							nALU_B := ONE;
+							nALU_OP := "01";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nT1 := ALU_O;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S19;
+							nstate_counter := "10";
+					end if;
+
+			when S19 =>
+					if (state_counter = "10") then
+							nALU_A := T1;
+							nALU_B := sign_extender9(jIm);
+							nALU_OP := "00";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nT2 := ALU_O;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S20;
+							nstate_counter := "10";
+					end if;
+
+			when S20 =>
+					if (state_counter = "10") then
+							nIP := T2;
+							nREG_A1 := rRA;
+							nREG_Din1 := T1;
+							nREG_W1 := '1';
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nREG_W1 := '0';
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S0;
+							nstate_counter := "10";
+					end if;
 
 
 			 when others => null;
