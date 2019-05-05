@@ -202,11 +202,13 @@ begin
 
   		 when Decode =>
 			 		if (Instruction = "0000" or Instruction = "0010") then
-						next_state := S1;
+						next_state := S1;		 -- ADD and NAND
 					elsif (Instruction = "0001" or Instruction = "0100") then
-						next_state := S4;
+						next_state := S4;		 -- ADI and LW
 					elsif (Instruction = "0011") then
-						next_state := S8;
+						next_state := S8;		 -- LHI
+					elsif (instruction = "0101") then
+						next_state := S9;    -- SW
 					else
 						next_state := S0;
 					end if;
@@ -353,6 +355,55 @@ begin
 					 next_state := S0;
 				   nstate_counter := "10";
 				 end if;
+
+		 when S9 =>
+					if (state_counter = "10") then
+						nREG_A1 := rRA;
+					  nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+						nT1 := REG_Dout1;
+						nT2 := sign_extender(iIm);
+					  nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+						next_state := S10;
+					  nstate_counter := "10";
+					end if;
+
+		 when S10 =>
+					if (state_counter = "10") then
+						nALU_A := T1;
+						nALU_B := T2;
+						nREG_A1 := rRA;
+					  nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+						nT1 := ALU_O;
+						nZ := ALU_C;
+						nT2 := REG_Dout1;
+						phi_z0 := '1';
+					  nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+						next_state := S11;
+					  nstate_counter := "10";
+					end if;
+
+			when S11 =>
+ 					if (state_counter = "10") then
+ 						nMEM_A := T1;
+ 						nMEM_Din := T2;
+						nMEM_W := '1';
+						nstate_counter := "01";
+ 					end if;
+ 					if (state_counter = "01") then
+				  	nstate_counter := "00";
+ 					end if;
+ 					if (state_counter = "00") then
+ 						next_state := S0;
+ 					  nstate_counter := "10";
+ 					end if;
 
 
        -- when C1 =>
