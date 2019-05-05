@@ -12,6 +12,27 @@ end entity Proc;
 
 architecture arch of Proc is
 
+	function sign_extender(slv : in std_logic_vector) return std_logic_vector is
+	  --extend a 6 bit vector to 16 bit vector
+	  variable res_v : std_logic_vector(15 downto 0);
+		begin
+			res_v(5 downto 0) := slv;
+		  for i in 0 to 9 loop
+		    res_v(i + 6) := slv(5);
+		  end loop;
+	  return res_v;
+	end function;
+
+	function zero_extender(slv : in std_logic_vector) return std_logic_vector is
+	  --extend a 9 bit vector to 16 bit vector by adding zeros to starting
+	  variable res_v : std_logic_vector(15 downto 0);
+		begin
+			res_v(8 downto 0) := slv;
+			res_v(15 downto 9) := "0000000";
+	  return res_v;
+	end function;
+
+
 	component ALU is
 		port (
 			A, B	: in std_logic_vector(15 downto 0);
@@ -66,7 +87,7 @@ architecture arch of Proc is
 	alias rRC is IR(5 downto 3);
 	alias rC is IR(1);
 	alias rZ is IR(0);
-
+	alias iIm is IR(5 downto 0);
 
 begin
 
@@ -181,6 +202,8 @@ begin
   		 when Decode =>
 			 		if (Instruction = "0000" or Instruction = "0010") then
 						next_state := S1;
+					elsif (Instruction = "0001" or Instruction = "0100") then
+						next_state := S4;
 					else
 						next_state := S0;
 					end if;
@@ -205,12 +228,12 @@ begin
 
  			 when S2 =>
 			 		if (state_counter = "10") then
-						nALU_A := T1;
-						nALU_B := T2;
-						if(Instruction = "0000") then
-							nALU_OP := "00";
-						else
+							nALU_A := T1;
+							nALU_B := T2;
+						if(Instruction = "0010") then
 							nALU_OP := "10";
+						else
+							nALU_OP := "00";
 						end if;
 						nstate_counter := "01";
 			 		end if;
@@ -245,7 +268,73 @@ begin
 					   nstate_counter := "10";
 					 end if;
 
+		 	when S4 =>
+					if (state_counter = "10") then
+						nREG_A1 := rRA;
+					  nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+						nT1 := REG_Dout1;
+						nT2 := sign_extender(iIm);
+					  nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+						next_state := S5;
+					  nstate_counter := "10";
+					end if;
 
+			when S5 =>
+			 		if (state_counter = "10") then
+							nALU_A := T1;
+							nALU_B := T2;
+							nALU_OP := "00";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nT3 := ALU_O;
+							nC := ALU_C;
+							nZ := ALU_Z;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							if (Instruction = "0001") then
+								next_state := S6;
+							else
+								next_state := S7;
+							end if;
+							nstate_counter := "10";
+					end if;
+
+			when S6 =>
+					 if (state_counter = "10") then
+						 nREG_A1 := rRB;
+						 nREG_Din1 := T3;
+						 nREG_W1 := '1';
+					   nstate_counter := "01";
+					 end if;
+					 if (state_counter = "01") then
+						 phi_c0 := not IR(14);  -- Changin carry flag only for ADI and not for LW
+						 phi_z0 := '1';
+					   nstate_counter := "00";
+					 end if;
+					 if (state_counter = "00") then
+						 next_state := S0;
+					   nstate_counter := "10";
+					 end if;
+
+ 		 when S7 =>
+				 if (state_counter = "10") then
+					 nMEM_A := T3;
+				   nstate_counter := "01";
+				 end if;
+				 if (state_counter = "01") then
+					 nT3 := MEM_Dout;
+				   nstate_counter := "00";
+				 end if;
+				 if (state_counter = "00") then
+					 next_state := S6;
+				   nstate_counter := "10";
+				 end if;
 
        -- when C1 =>
        --      s_var := not a xor b;
