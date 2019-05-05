@@ -233,6 +233,8 @@ begin
 						next_state := S18;   -- JAL
 					elsif (Instruction = "0110") then
 						next_state := S20;   -- LA
+					elsif (Instruction = "0111") then
+						next_state := S25;   -- SA
 					else
 						next_state := S0;
 					end if;
@@ -644,6 +646,81 @@ begin
 							end if;
 							nstate_counter := "10";
 					end if;
+
+			when S25 =>
+					if (state_counter = "10") then
+							nREG_A1 := rRA;
+							nT2 := Z16;
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nT1 := REG_Dout1;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S26;
+							nstate_counter := "10";
+					end if;
+
+			when S26 =>
+					if (state_counter = "10") then
+							nREG_A1 := T2(2 downto 0);
+							nALU_A := T2;
+							nALU_B := ONE;
+							nALU_OP := "00";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nT3 := REG_Dout1;
+							nT2 := ALU_O;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S27;
+							nstate_counter := "10";
+					end if;
+
+			when S27 =>
+					if (state_counter = "10") then
+							nMEM_A := T1;
+							nMEM_Din := T3;
+							nMEM_W := '1';
+							nALU_A := T1;
+							nALU_B := ONE;
+							nALU_OP := "00";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nMEM_W := '0';
+							nT1 := ALU_O;
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							next_state := S28;
+							nstate_counter := "10";
+					end if;
+
+			when S28 =>
+					if (state_counter = "10") then
+							nALU_A := T2;
+							nALU_B := SEVEN;
+							nALU_OP := "01";
+							nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+							nZ := ALU_Z;
+							phi_z0 := '0';
+							nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+							if (nZ = '1') then
+								next_state := S0;
+							else
+								next_state := S26;
+							end if;
+							nstate_counter := "10";
+					end if;
+
 
 
 			 when others => null;
