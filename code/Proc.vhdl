@@ -60,6 +60,7 @@ architecture arch of Proc is
 	end component;
 
 	constant Z16 : std_logic_vector(15 downto 0):= (others  => '0');
+	constant ONE : std_logic_vector(15 downto 0):= "0000000000000001";
 
   type StateSymbol is (S0, Decode, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25, S26, S27, S28, S29 );
   signal fsm_state_symbol: StateSymbol;
@@ -183,7 +184,7 @@ begin
 							nMEM_A := IP;
 							nALU_OP := "00";
 							nALU_A := IP;
-							nALU_B := "0000000000000001";
+							nALU_B := ONE;
 							nstate_counter := "01";
 							phi_c0 := '0';
 							phi_z0 := '0';
@@ -209,6 +210,8 @@ begin
 						next_state := S8;		 -- LHI
 					elsif (instruction = "0101") then
 						next_state := S9;    -- SW
+					elsif (Instruction = "1100") then
+						next_state := S12;   -- BEQ
 					else
 						next_state := S0;
 					end if;
@@ -405,14 +408,65 @@ begin
  					  nstate_counter := "10";
  					end if;
 
+			when S12 =>
+ 					if (state_counter = "10") then
+						nREG_A1 := rRA;
+						nREG_A2 := rRB;
+						nALU_A := IP;
+						nALU_B := ONE;
+						nALU_OP := "01";
+						nstate_counter := "01";
+ 					end if;
+ 					if (state_counter = "01") then
+						nT1 := REG_Dout1;
+						nT2 := REG_Dout2;
+						nT3 := nALU_O;
+				  	nstate_counter := "00";
+ 					end if;
+ 					if (state_counter = "00") then
+ 						next_state := S13;
+ 					  nstate_counter := "10";
+ 					end if;
 
-       -- when C1 =>
-       --      s_var := not a xor b;
-       --      if (a = '0' and b = '0') then
-       --          nq_var := C0;
-       --      else
-       --          nq_var := C1;
-       --      end if;
+		when S13 =>
+					if (state_counter = "10") then
+						nALU_A := T3;
+						nALU_B := sign_extender(iIm);
+						nALU_OP := "00";
+						nstate_counter := "01";
+					end if;
+					if (state_counter = "01") then
+						nT3 := ALU_O;
+						nstate_counter := "00";
+					end if;
+					if (state_counter = "00") then
+						next_state := S14;
+					  nstate_counter := "10";
+					end if;
+
+			when S14 =>
+ 					if (state_counter = "10") then
+						nALU_A := T1;
+						nALU_B := T2;
+						nALU_OP := "01";
+						nstate_counter := "01";
+ 					end if;
+ 					if (state_counter = "01") then
+						nZ := ALU_Z;
+						phi_z0 := '1';
+						nstate_counter := "00";
+ 					end if;
+ 					if (state_counter = "00") then
+ 						next_state := S15;
+ 					  nstate_counter := "10";
+ 					end if;
+
+			when S15 =>
+ 					if (nZ = '1') then
+						nIP := T3;
+ 					end if;
+					next_state := S0;
+
 
 			 when others => null;
      end case;
