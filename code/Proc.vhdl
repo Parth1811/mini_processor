@@ -88,6 +88,7 @@ architecture arch of Proc is
 	alias rC is IR(1);
 	alias rZ is IR(0);
 	alias iIm is IR(5 downto 0);
+	alias jIm is IR(8 downto 0);
 
 begin
 
@@ -204,6 +205,8 @@ begin
 						next_state := S1;
 					elsif (Instruction = "0001" or Instruction = "0100") then
 						next_state := S4;
+					elsif (Instruction = "0011") then
+						next_state := S8;
 					else
 						next_state := S0;
 					end if;
@@ -335,6 +338,22 @@ begin
 					 next_state := S6;
 				   nstate_counter := "10";
 				 end if;
+
+	   when S8 =>
+				 if (state_counter = "10") then
+					 nREG_A1 := rRA;
+					 nREG_Din1 := zero_extender(jIm);
+				   nREG_W1 := '1';
+					 nstate_counter := "01";
+				 end if;
+				 if (state_counter = "01") then
+				   nstate_counter := "00";
+				 end if;
+				 if (state_counter = "00") then
+					 next_state := S0;
+				   nstate_counter := "10";
+				 end if;
+
 
        -- when C1 =>
        --      s_var := not a xor b;
