@@ -40,7 +40,7 @@ architecture arch of Proc is
 
 	constant Z16 : std_logic_vector(15 downto 0):= (others  => '0');
 
-  type StateSymbol is (S0, S0_set, Decode, S1, S1_set, S2, S2_set);
+  type StateSymbol is (S0, Decode, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19, S20, S21, S22, S23, S24, S25, S26, S27, S28, S29 );
   signal fsm_state_symbol: StateSymbol;
 
 	signal ALU_A, ALU_B, ALU_O : std_logic_vector(15 downto 0);
@@ -62,6 +62,8 @@ architecture arch of Proc is
 	alias rRA is IR(11 downto 9);
 	alias rRB is IR(8 downto 6);
 	alias rRC is IR(5 downto 3);
+	alias rC is IR(1);
+	alias rZ is IR(0);
 
 
 begin
@@ -116,7 +118,7 @@ begin
 		 variable nstate_counter : std_logic_vector(1 downto 0);
 
 		 variable nIP, nIR, nT1, nT2, nT3 : std_logic_vector(15 downto 0);
-		 variable nC, nZ : std_logic;
+		 variable nC, nZ, phi_c0, phi_z0 : std_logic;
 
   begin
      next_state := fsm_state_symbol;
@@ -144,8 +146,8 @@ begin
 		 nT2 := T2;
 		 nT3 := T3;
 
-		 nZ := Z0;
-		 nC := C0;
+		 nZ := nZ;
+		 nC := nC;
 
 
      -- compute next-state, output
@@ -159,6 +161,8 @@ begin
 							nALU_A := IP;
 							nALU_B := "0000000000000001";
 							nstate_counter := "01";
+							phi_c0 := '0';
+							phi_z0 := '0';
 					end if;
 					if (state_counter = "01") then
 							nIP := ALU_O;
@@ -180,27 +184,61 @@ begin
 					end if;
 
  			 when S1 =>
-					nREG_A1 := rRA;
-					nREG_A2 := rRB;
-					-- nT1 := REG_Dout1;
-					-- nT2 := REG_Dout2;
-					next_state := S1_set;
+			 		if (state_counter = "10") then
+						nREG_A1 := rRA;
+						nREG_A2 := rRB;
+						nstate_counter := "01";
+			 		end if;
 
-			 when S1_set =>
-					nT1 := REG_Dout1;
-					nT2 := REG_Dout2;
-					next_state := S2;
+					if (state_counter = "01") then
+						nT1 := REG_Dout1;
+						nT2 := REG_Dout2;
+						nstate_counter := "00";
+					end if;
 
+					if (state_counter = "00") then
+						next_state := S2;
+						nstate_counter := "10";
+					end if;
 
  			 when S2 =>
-					nALU_A := T1;
-					nALU_B := T2;
-					next_state := S2_set;
+			 		if (state_counter = "10") then
+						nALU_A := T1;
+						nALU_B := T2;
+						nstate_counter := "01";
+			 		end if;
 
-			 when S2_set =>
-					nT3 := ALU_O;
-					nC := ALU_C;
-					nZ := ALU_Z;
+					if (state_counter = "01") then
+						nT3 := ALU_O;
+						nC := ALU_C;
+						nZ := ALU_Z;
+						nstate_counter := "00";
+					end if;
+
+					if (state_counter = "00") then
+						next_state := S3;
+						nstate_counter := "10";
+					end if;
+
+			 when S3 =>
+					 if (state_counter = "10") then
+						 nREG_A1 := rRC;
+						 nREG_Din1 := T3;
+						 nREG_W1 := ((not rC) and (not rZ)) or (rC and (not rZ) and C0) or (rZ and (not rC) and Z0)   ;
+					   nstate_counter := "01";
+					 end if;
+					 if (state_counter = "01") then
+						 phi_c0 := '1';
+						 phi_z0 := '1';
+					   nstate_counter := "00";
+					 end if;
+
+					 if (state_counter = "00") then
+						 next_state := S0;
+					   nstate_counter := "10";
+					 end if;
+
+
 
 
        -- when C1 =>
@@ -224,6 +262,9 @@ begin
 							T1 <= Z16;
 							T2 <= Z16;
 							T3 <= Z16;
+
+							C0 <= '0';
+							Z0 <= '0';
 
 							state_counter <= "10";
           else
@@ -249,8 +290,8 @@ begin
 							T2 <= nT2;
 							T3 <= nT3;
 
-							C0 <= nC;
-							Z0 <= nZ;
+							C0 <= (nC and phi_c0) or (C0 and (not phi_c0));
+							Z0 <= (nZ and phi_z0) or (Z0 and (not phi_z0));
 							state_counter <= nstate_counter;
               fsm_state_symbol <= next_state;
           end if;
