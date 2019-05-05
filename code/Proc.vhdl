@@ -59,6 +59,8 @@ architecture arch of Proc is
 
 	signal state_counter: std_logic_vector(1 downto 0);
 
+	alias Instruction is IR(15 downto 12);
+
 	alias rRA is IR(11 downto 9);
 	alias rRB is IR(8 downto 6);
 	alias rRC is IR(5 downto 3);
@@ -177,7 +179,7 @@ begin
 
 
   		 when Decode =>
-			 		if (IR(15 downto 12) = "0000") then
+			 		if (Instruction = "0000" or Instruction = "0010") then
 						next_state := S1;
 					else
 						next_state := S0;
@@ -205,6 +207,11 @@ begin
 			 		if (state_counter = "10") then
 						nALU_A := T1;
 						nALU_B := T2;
+						if(Instruction = "0000") then
+							nALU_OP := "00";
+						else
+							nALU_OP := "10";
+						end if;
 						nstate_counter := "01";
 			 		end if;
 
@@ -237,7 +244,6 @@ begin
 						 next_state := S0;
 					   nstate_counter := "10";
 					 end if;
-
 
 
 
