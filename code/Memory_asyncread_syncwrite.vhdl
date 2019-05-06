@@ -22,25 +22,24 @@ architecture Form of Memory_asyncread_syncwrite is
 	type regarray is array(65535 downto 0) of std_logic_vector(15 downto 0);   -- defining a new type
 	signal Memory:
 		regarray:=(
-				0 => "0000001010011000",
-				1 => "1000011011111010",
-				101 => "0010011011011010",
-				2 => x"1057",
-				3 => x"4442",
-				4 => x"0458",
-				5 => x"2460",
-				6 => x"2921",
-				7 => x"0000",
-				8 => x"2921",
-				9 => x"58c0",
-				10 => x"7292",
-				11 => x"6e60",
-				12 => x"c040",
-				13 => x"127f",
-				14 => x"c241",
-				16 => x"9440",
-				22 => x"83f5",
-				25 => x"ffed",
+				0 => "0000001010011000",		--ADD
+				1 => "0110011011111010",		--LA
+				2 => x"1057", 							--ADI
+				3 => x"4442",								--LW
+				4 => x"0458",								--ADD
+				5 => x"2460",								--NDU
+				6 => x"2921",               --NDZ
+				7 => x"0000",								--ADD
+				8 => x"2921",								--NDZ
+				9 => x"58c0",								--SW
+				10 => x"7292",							--SA
+				11 => x"6e60",							--LA
+				12 => x"c040",							--BEQ
+				13 => x"127f",							--ADI
+				14 => x"c241",							--BEQ
+				16 => x"9440",							--JLR
+				22 => x"83f5",							--JAL
+				25 => x"ffed",							--NONE
 				others => "0000000000000000");
 -- you can use the above mentioned way to initialise the memory with the instructions and the data as required to test your processor
 
