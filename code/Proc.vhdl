@@ -416,6 +416,7 @@ begin
 					end if;
 					if (state_counter = "00") then
 						next_state := S11;
+						phi_z0 := '0';
 					  nstate_counter := "10";
 					end if;
 
@@ -427,6 +428,7 @@ begin
 						nstate_counter := "01";
  					end if;
  					if (state_counter = "01") then
+						nMEM_W := '0';
 				  	nstate_counter := "00";
  					end if;
  					if (state_counter = "00") then

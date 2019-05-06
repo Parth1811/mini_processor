@@ -23,7 +23,7 @@ architecture Form of Memory_asyncread_syncwrite is
 	signal Memory:
 		regarray:=(
 				0 => "0000001010011000",
-				1 => "0011011011011010",
+				1 => "0101011011011010",
 				101 => "0010011011011010",
 				2 => x"1057",
 				3 => x"4442",
@@ -50,7 +50,7 @@ begin
 	Mem_write:
 	process (W,Din,A,clk)
 		begin
-			if(W = '0') then
+			if(W = '1') then
 				if(rising_edge(clk)) then
 					Memory(conv_integer(A)) <= Din;
 				end if;
