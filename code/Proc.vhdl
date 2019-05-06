@@ -574,7 +574,7 @@ begin
 							nstate_counter := "00";
 					end if;
 					if (state_counter = "00") then
-							next_state := S0;
+							next_state := S21;
 							nstate_counter := "10";
 					end if;
 
