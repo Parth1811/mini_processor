@@ -547,17 +547,21 @@ begin
 
 			when S19 =>
 					if (state_counter = "10") then
+							nREG_A1 := rRA;
+							nREG_Din1 := T1;
+							nREG_W1 := '1';
 							nALU_A := T1;
 							nALU_B := sign_extender9(jIm);
 							nALU_OP := "00";
 							nstate_counter := "01";
 					end if;
 					if (state_counter = "01") then
-							nT2 := ALU_O;
+							nREG_W1 := '0';
+							nIP := ALU_O;
 							nstate_counter := "00";
 					end if;
 					if (state_counter = "00") then
-							next_state := S20;
+							next_state := S0;
 							nstate_counter := "10";
 					end if;
 
