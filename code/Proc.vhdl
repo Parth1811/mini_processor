@@ -707,7 +707,7 @@ begin
 			when S28 =>
 					if (state_counter = "10") then
 							nALU_A := T2;
-							nALU_B := SEVEN;
+							nALU_B := "0000000000001000";
 							nALU_OP := "01";
 							nstate_counter := "01";
 					end if;

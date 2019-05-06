@@ -23,7 +23,7 @@ architecture Form of Memory_asyncread_syncwrite is
 	signal Memory:
 		regarray:=(
 				0 => "0000001010011000",
-				1 => "0110011011111010",
+				1 => "0111011011111010",
 				101 => "0010011011011010",
 				2 => x"1057",
 				3 => x"4442",
