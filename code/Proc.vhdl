@@ -516,10 +516,12 @@ begin
 							nREG_A1 := rRA;
 							nREG_A2 := rRB;
 							nREG_Din1 := T1;
+							nREG_W1 := '1';
 							nstate_counter := "01";
 					end if;
 					if (state_counter = "01") then
 							nIP := REG_Dout2;
+							nREG_W1 := '0';
 							nstate_counter := "00";
 					end if;
 					if (state_counter = "00") then
