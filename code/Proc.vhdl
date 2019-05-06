@@ -448,7 +448,7 @@ begin
  					if (state_counter = "01") then
 						nT1 := REG_Dout1;
 						nT2 := REG_Dout2;
-						nT3 := nALU_O;
+						nT3 := ALU_O;
 				  	nstate_counter := "00";
  					end if;
  					if (state_counter = "00") then
